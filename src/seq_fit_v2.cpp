@@ -5,15 +5,8 @@
 #include <stdio.h>
 #include <string>
 
-#define MSG0(arg) \
-    ;             \
-    printf(arg);
-#define MSG1(arg1, arg2) \
-    ;                    \
-    printf(arg1, arg2);
-
-#define U1 unsigned char // 1 byte
-#define U4 unsigned long // 4 bytes
+using U1 = unsigned char; // 1 byte
+using U4 = unsigned long; // 4 bytes
 
 /**
  * list element format
@@ -28,15 +21,6 @@
  * link has prev = 0 (0 indicates not used) last link has next = 0
  *
  * **/
-
-/*#define get_prev(index) (*((U4*)(&ram[index - 13])))*/
-/*#define get_next(index) (*((U4*)(&ram[index - 9])))*/
-/*#define get_state(index) (*((std::uint8_t*)(&ram[index - 5]))) /* FREE, OCCUPIED */
-/*#define get_size(index) (*((U4*)(&ram[index - 4])))*/
-
-/*    static const unsigned long START*/
-/*    = 13;*/
-/*static const unsigned long HEADER_SIZE = 13;*/
 
 class MemoryBlockManager {
 protected:
@@ -193,8 +177,8 @@ void SeqFitMemManager::split(U4 address, U4 n_bytes)
         U4 new_addr;
 
         old_next = get_next(address);
-        old_prev = get_next(address);
-        old_size = get_next(address);
+        old_prev = get_prev(address);
+        old_size = get_size(address);
 
         new_addr = address + n_bytes + HEADER_SIZE;
 
@@ -208,7 +192,7 @@ void SeqFitMemManager::split(U4 address, U4 n_bytes)
         set_next(new_addr, old_next);
         set_prev(new_addr, old_prev);
         set_state(new_addr, State::FREE);
-        set_size(new_addr, old_size = n_bytes - HEADER_SIZE);
+        set_size(new_addr, old_size - n_bytes - HEADER_SIZE);
 
     } else {
         std::cout << "SeqFitMemManager::split(): Fail to split\n";
@@ -359,7 +343,7 @@ void SeqFitMemManager::print_state()
               << ", " << std::hex << "0x" << get_prev(current) << " ";
     std::cout << "ADDRESS = " << std::hex << "0x" << current << " ";
     std::cout << (get_state(current) == State::FREE ? "FREE" : "OCCUPIED") << " ";
-    std::cout << "get_size = " << get_size(current) << " ";
+    std::cout << "get_size = " << std::dec << get_size(current) << " ";
     std::cout << "get_next = " << get_next(current);
     std::cout << '\n';
 }
